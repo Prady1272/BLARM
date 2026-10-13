@@ -1,0 +1,558 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BLARM: Animating 3D Objects from Video via Blending LAtent Rigid Motion Primitives</title>
+  <meta name="description" content="BLARM is a feed-forward method that animates a static 3D mesh from a monocular video using compact latent rigid motion primitives and time-invariant skinning weights. NeurIPS 2026.">
+  <meta property="og:title" content="BLARM · NeurIPS 2026">
+  <meta property="og:description" content="Animating 3D objects from video via blending latent rigid motion primitives.">
+  <meta property="og:image" content="static/figures/Teaser.webp">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..800&family=Newsreader:ital,opsz,wght@0,6..72,300..800;1,6..72,300..800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+  <link rel="stylesheet" href="static/css/style.css">
+  <script>
+    (function () {
+      var t = localStorage.getItem("blarm-theme");
+      if (t) document.documentElement.setAttribute("data-theme", t);
+    })();
+  </script>
+</head>
+<body>
+
+<nav class="topbar" id="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="#top">BLARM</a>
+    <div class="nav-links">
+      <a href="#tldr">Overview</a>
+      <a href="#representation">Representation</a>
+      <a href="#method">Method</a>
+      <a href="#results">Results</a>
+      <a href="#comparison">Comparison</a>
+      <a href="#skinning">Interpretability</a>
+      <a href="#quantitative">Numbers</a>
+      <a href="#bibtex">BibTeX</a>
+    </div>
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle color theme">
+      <svg class="icon-sun" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="4.5" fill="none" stroke="currentColor" stroke-width="1.6"/><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></g></svg>
+      <svg class="icon-moon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+    </button>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <div class="wrap">
+    <div class="venue-chip"><span class="dot"></span>NeurIPS 2026</div>
+    <h1 class="title">BLARM</h1>
+    <p class="subtitle">
+      Animating 3D Objects from Video via
+      <span class="acro"><b>B</b>lending</span>
+      <span class="acro"><b>LA</b>tent</span>
+      <span class="acro"><b>R</b>igid</span>
+      <span class="acro"><b>M</b>otion</span> Primitives
+    </p>
+
+    <ul class="authors">
+      <li><a href="https://prady1272.github.io/" target="_blank" rel="noopener">Pradyumn Goyal</a><sup>1,2</sup></li>
+      <li><a href="https://itzikbs.com/" target="_blank" rel="noopener">Yizhak Ben-Shabat</a><sup>1</sup></li>
+      <li><a href="https://dgp.toronto.edu/~hsuehtil/" target="_blank" rel="noopener">Hsueh-Ti Derek Liu</a><sup>1</sup></li>
+      <li><a href="https://www.linkedin.com/in/haomiao-jiang-34bba32b" target="_blank" rel="noopener">Haomiao Jiang</a><sup>1</sup></li>
+      <li><span>Snehasish Mukherjee</span><sup>1</sup></li>
+      <li><span>Kyle Spence</span><sup>1</sup></li>
+      <li><span>Mark Stauber</span><sup>1</sup></li>
+      <li><a href="https://kalo-ai.github.io/" target="_blank" rel="noopener">Evangelos Kalogerakis</a><sup>2,3</sup></li>
+      <li><a href="https://yunzezeng.com/" target="_blank" rel="noopener">Yunze Zeng</a><sup>1</sup></li>
+    </ul>
+    <ul class="affils">
+      <li><sup>1</sup>Roblox</li>
+      <li><sup>2</sup>UMass Amherst</li>
+      <li><sup>3</sup>TU Crete</li>
+    </ul>
+    <div class="links">
+      <a class="btn btn-primary" href="static/paper.pdf" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M7 3h7l5 5v13H7z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M14 3v5h5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+        Paper
+      </a>
+      <a class="btn" href="https://arxiv.org/abs/2608.31113" target="_blank" rel="noopener">
+        <span class="btn-mono">arXiv</span> 2608.31113
+      </a>
+      <span class="btn btn-disabled" title="Code release coming soon">
+        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M8.5 8 4.5 12l4 4M15.5 8l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Code <em>soon</em>
+      </span>
+      <a class="btn" href="#bibtex">
+        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M6 4h12v16l-6-4-6 4z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+        BibTeX
+      </a>
+    </div>
+  </div>
+
+  <div class="hero-reel" aria-label="BLARM animations">
+    <video autoplay muted loop playsinline preload="auto" poster="static/videos/hero_0.jpg"><source src="static/videos/hero_0.mp4" type="video/mp4"></video>
+    <video autoplay muted loop playsinline preload="auto" poster="static/videos/hero_1.jpg"><source src="static/videos/hero_1.mp4" type="video/mp4"></video>
+    <video autoplay muted loop playsinline preload="auto" poster="static/videos/hero_2.jpg"><source src="static/videos/hero_2.mp4" type="video/mp4"></video>
+    <video autoplay muted loop playsinline preload="auto" poster="static/videos/hero_3.jpg"><source src="static/videos/hero_3.mp4" type="video/mp4"></video>
+    <video autoplay muted loop playsinline preload="auto" poster="static/videos/hero_4.jpg"><source src="static/videos/hero_4.mp4" type="video/mp4"></video>
+    <video autoplay muted loop playsinline preload="auto" poster="static/videos/hero_5.jpg"><source src="static/videos/hero_5.mp4" type="video/mp4"></video>
+  </div>
+</header>
+
+<main>
+
+  <section class="section" id="teaser">
+    <div class="wrap wide">
+      <figure class="figure figure-flat">
+        <img src="static/figures/Teaser.webp" alt="BLARM teaser: textured animations next to their learned skinning weights" loading="eager">
+        <figcaption>
+          <strong>BLARM</strong> animates static 3D meshes from monocular videos using compact, time-varying latent rigid motions
+          and time-invariant vertex-to-component skinning weights, visualized right of the textured animations. Our
+          representation produces temporally coherent, rig-free mesh animations across diverse objects.
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="section" id="tldr">
+    <div class="wrap">
+      <h2 class="h-tldr">TL;DR</h2>
+      <p class="lede">
+        Video-driven mesh animators usually regress every vertex independently, which is high-dimensional.
+        BLARM instead explains the motion with a <strong>small set of learned rigid transformations</strong> that change over time, blended onto the mesh by
+        <strong>skinning weights that stay fixed</strong>. No skeletons, cages, or rig annotations are used during training or at test time.
+      </p>
+    </div>
+  </section>
+
+  <section class="section" id="abstract">
+    <div class="wrap">
+      <div class="eyebrow">Abstract</div>
+      <p class="abstract">
+        We introduce BLARM, a feed-forward method for video-driven 3D mesh animation. Given a monocular video and a static object mesh,
+        BLARM predicts a temporally coherent animated mesh whose motion follows the video. Rather than relying on explicit rigs or directly
+        regressing high-dimensional vertex motion, we represent animation using a compact set of learned, time-varying rigid motion components
+        and time-invariant vertex-to-component skinning weights. This yields a low-dimensional deformation space without requiring skeletons,
+        cages, skinning weights, or rig annotations. Our architecture conditions geometry-derived deformation latents on video features through
+        factorized spatial-temporal attention, then decodes rigid transformations blended by predicted skinning weights. Trained with trajectory
+        reconstruction, entropy regularization, and motion-aware contrastive learning, BLARM produces accurate and temporally stable animations
+        while recovering compact, interpretable motion structure from monocular video.
+      </p>
+    </div>
+  </section>
+
+  <section class="section" id="representation">
+    <div class="wrap">
+      <div class="eyebrow"><span class="num">01</span> Representation</div>
+      <h2>How the object moves, separated from where it moves</h2>
+      <p>
+        Many object motions are intrinsically low-dimensional: large groups of vertices move together as rigid or nearly rigid parts.
+        BLARM exploits this structure, but learns the parts from data instead of relying on a predefined rig. For every frame $t$ it predicts $J$ latent motion components, each decoded into a rigid
+        transformation $(R_{t,i},\, t_{t,i}) \in SE(3)$. Each canonical vertex $x_n$ gets one set of weights $w_n$ over the non-root components,
+        fixed across the whole video. The first component is a special <em>root</em> that carries the global motion of the object.
+      </p>
+
+      <div class="equation-card">
+        <div class="eq">$$\hat{x}_{t,n} \;=\; R_{t,1}\Big(\sum_{i=2}^{J} w_{n,i}\,\big(R_{t,i}\,x_n + t_{t,i}\big)\Big) + t_{t,1}$$</div>
+        <div class="eq-legend">
+          <div><span class="swatch sw-a"></span><b>$R_{t,i},\, t_{t,i}$</b> time-varying rigid motion of component $i$</div>
+          <div><span class="swatch sw-b"></span><b>$w_{n,i}$</b> time-invariant skinning weight of vertex $n$</div>
+          <div><span class="swatch sw-c"></span><b>$R_{t,1},\, t_{t,1}$</b> root component for global motion</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="method">
+    <div class="wrap">
+      <div class="eyebrow"><span class="num">02</span> Architecture</div>
+      <h2>From a mesh and a video to rigid motions and skinning weights</h2>
+      <p>
+        BLARM takes a canonical mesh and a monocular video and predicts two things in a single forward pass:
+        a sequence of time-varying rigid transformations and a set of time-invariant skinning weights.
+      </p>
+    </div>
+    <div class="wrap wide">
+      <figure class="figure">
+        <img src="static/figures/Architecture.webp" width="2400" height="1800" alt="BLARM architecture overview" loading="lazy" data-zoom>
+        <figcaption>
+          <b>Method overview.</b> BLARM takes a canonical mesh and a monocular video as input and represents the animation using a compact set
+          of latent rigid motion components. Geometry-aware latents are conditioned on frame-wise DINOv3 features to predict time-varying rigid
+          transformations, while time-invariant vertex-to-component skinning weights are learned without explicit skinning supervision. The final
+          animated sequence is obtained by blending the predicted transformations through linear blend skinning.
+        </figcaption>
+      </figure>
+    </div>
+    <div class="wrap">
+      <ol class="steps">
+        <li>
+          <div class="step-num">1</div>
+          <div>
+            <h3>Geometry encoding</h3>
+            <p>
+              Surface points and normals are encoded by the frozen TripoSG shape encoder. A fixed set of $J$ learnable queries cross-attends
+              to these dense features, DETR-style, compressing the shape into $J$ deformation tokens. Each token is a candidate motion component.
+            </p>
+          </div>
+        </li>
+        <li>
+          <div class="step-num">2</div>
+          <div>
+            <h3>Motion encoding with factorized attention</h3>
+            <p>
+              Tokens are broadcast over time and refined by 16 blocks of <span class="tag tag-teal">DINOv3 cross-attention</span>,
+              <span class="tag tag-pink">spatial self-attention</span> within each frame, and
+              <span class="tag tag-amber">temporal self-attention</span> across frames.
+              This costs $O(TJ^2) + O(JT^2)$ instead of $O((TJ)^2)$ for full attention, while preserving both part-to-part coordination and temporal consistency.
+            </p>
+          </div>
+        </li>
+        <li>
+          <div class="step-num">3</div>
+          <div>
+            <h3>Rigid decoding and skinning</h3>
+            <p>
+              Two small MLP heads decode every token into a 6D rotation (orthogonalized with Gram&ndash;Schmidt) and a translation.
+              For the weights, each vertex combines a positional encoding with frozen PartField features and cross-attends to the
+              time-averaged motion tokens; a softmax gives non-negative, normalized weights.
+            </p>
+          </div>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="section" id="training">
+    <div class="wrap">
+      <div class="eyebrow"><span class="num">03</span> Training</div>
+      <h2>Three losses, no rig supervision</h2>
+      <p>BLARM is trained only from point trajectories. Three complementary terms shape the motion and the decomposition:</p>
+      <div class="loss-grid">
+        <div class="loss-card">
+          <div class="loss-name">Trajectory reconstruction</div>
+          <div class="eq small">$$\mathcal{L}_{rec} = \tfrac{1}{TN_v}\textstyle\sum_{t,n} \omega_{t,n}\,\lVert \hat{x}_{t,n} - x^*_{t,n}\rVert_1$$</div>
+          <p>A focal-style weight $\omega_{t,n}$ emphasizes points with large error, so articulated regions are not drowned out by static ones.</p>
+        </div>
+        <div class="loss-card">
+          <div class="loss-name">Entropy regularization</div>
+          <div class="eq small">$$\mathcal{L}_{ent} = -\tfrac{1}{N_v}\textstyle\sum_{n}\sum_{i\ge 2} w_{n,i}\log w_{n,i}$$</div>
+          <p>Encourages each vertex to depend on only a few components, like a vertex bound to a few bones in a traditional rig.</p>
+        </div>
+        <div class="loss-card">
+          <div class="loss-name">Motion-aware contrastive</div>
+          <div class="eq small">$$s^{skin}_{u,v} = \textstyle\sum_{i\ge 2}\sqrt{w_{u,i}\,w_{v,i}}$$</div>
+          <p>An InfoNCE loss on the Bhattacharyya similarity of skinning weights pulls together vertices that move alike and pushes apart those that do not.</p>
+        </div>
+      </div>
+
+      <div class="split">
+        <figure class="figure figure-flat">
+          <img src="static/figures/Contrastive_Example-2.webp" width="2400" height="2009" alt="Contrastive triplet construction" loading="lazy" data-zoom>
+        </figure>
+        <div class="split-text">
+          <h3>Mining pairs from motion</h3>
+          <p>
+            Each point trajectory is summarized by a per-frame descriptor of rotation-axis direction, translation direction, and a static flag.
+            Motion similarity, averaged over time, picks candidate pairs, and canonical-space distance decides how they are sampled:
+          </p>
+          <ul class="legend-list">
+            <li><span class="pin pin-blue"></span><b>Anchor</b> a vertex on the moving leaf</li>
+            <li><span class="pin pin-green"></span><b>Positive</b> nearby, moves the same way</li>
+            <li><span class="pin pin-red"></span><b>Hard negative</b> nearby, moves differently</li>
+            <li><span class="pin pin-yellow"></span><b>Easy negative</b> far away, moves differently</li>
+          </ul>
+          <p class="muted">Hard negatives sharpen boundaries between neighbouring parts; easy negatives keep unrelated motions apart globally.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="results">
+    <div class="wrap">
+      <div class="eyebrow"><span class="num">04</span> Results</div>
+      <h2>Ground truth next to BLARM</h2>
+      <p>
+        Held-out sequences from <b>ActionBench</b> (16 frames) and <b>Motion80</b> (variable length, up to 72 frames shown).
+        Each clip shows the ground-truth animation on the left (this is also the video BLARM sees) and BLARM's animated mesh on the right,
+        rendered from the same camera with the original texture. Click a clip to enlarge it.
+      </p>
+      <div class="tabs" role="tablist" data-tabs="results">
+        <button role="tab" class="tab active" data-target="grid-actionbench" aria-selected="true">ActionBench</button>
+        <button role="tab" class="tab" data-target="grid-motion80" aria-selected="false">Motion80</button>
+      </div>
+    </div>
+    <div class="wrap wide">
+      <div class="video-grid tab-panel active" id="grid-actionbench" data-dataset="actionbench"></div>
+      <div class="video-grid tab-panel" id="grid-motion80" data-dataset="motion80"></div>
+    </div>
+  </section>
+
+  <section class="section" id="comparison">
+    <div class="wrap">
+      <div class="eyebrow"><span class="num">05</span> Comparison</div>
+      <h2>Against feed-forward mesh animators</h2>
+      <p>
+        We compare with <a href="https://remysabathier.github.io/actionmesh/" target="_blank" rel="noopener">ActionMesh</a>,
+        <a href="https://motion3-to-4.github.io/" target="_blank" rel="noopener">Motion3-to-4</a>, and
+        <a href="https://mesh-4d.github.io/" target="_blank" rel="noopener">Mesh4D</a>, which, like BLARM, take a video and a canonical mesh
+        and output an animated mesh without a predefined rig. All methods receive the same ground-truth first-frame mesh.
+      </p>
+      <div class="tabs" role="tablist" data-tabs="comparison">
+        <button role="tab" class="tab active" data-target="cmp-ab" aria-selected="true">ActionBench</button>
+        <button role="tab" class="tab" data-target="cmp-m80" aria-selected="false">Motion80</button>
+      </div>
+    </div>
+    <div class="wrap wide">
+      <figure class="figure tab-panel active" id="cmp-ab">
+        <img src="static/figures/Qualitative_Actionbench-main.webp" width="2400" height="1142" alt="Qualitative comparison on ActionBench" loading="lazy" data-zoom>
+        <figcaption><b>Qualitative comparison on ActionBench.</b> Across diverse shapes, BLARM preserves the canonical mesh structure better than baselines and yields temporally more coherent animations with fewer jittering or distorted parts.</figcaption>
+      </figure>
+      <figure class="figure tab-panel" id="cmp-m80">
+        <img src="static/figures/Qualitative_Motion80-3.webp" width="2400" height="1200" alt="Qualitative comparison on Motion80" loading="lazy" data-zoom>
+        <figcaption><b>Qualitative comparison on Motion80.</b> Compared to the baselines, BLARM better maintains part structure and produces more stable deformations across time, yielding animations that closely match the ground-truth motion.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="section" id="skinning">
+    <div class="wrap">
+      <div class="eyebrow"><span class="num">06</span> Interpretability</div>
+      <h2>Part structure, discovered without supervision</h2>
+      <p>
+        Coloring each vertex by its skinning weights shows what BLARM has learned. Without any rig or part labels, the components line up
+        with regions that move coherently in the video. Below, each example shows the input video next to the animated mesh colored by its
+        predicted weights, with the location of every component marked.
+      </p>
+    </div>
+    <div class="wrap wide">
+      <div class="skin-viewer" id="skinViewer">
+        <div class="skin-controls">
+          <div class="tabs" role="tablist" id="skinTabs">
+            <button role="tab" class="tab active" data-ds="actionbench" aria-selected="true">ActionBench</button>
+            <button role="tab" class="tab" data-ds="motion80" aria-selected="false">Motion80</button>
+          </div>
+          <div class="skin-pager">
+            <button class="pager-btn" id="skinPrev" aria-label="Previous examples">&#8249;</button>
+            <span id="skinPage">1 / 1</span>
+            <button class="pager-btn" id="skinNext" aria-label="Next examples">&#8250;</button>
+          </div>
+        </div>
+        <div class="skin-grid" id="skinGrid"></div>
+        <div class="skin-chips" id="skinChips"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="same-object">
+    <div class="wrap">
+      <div class="eyebrow"><span class="num">07</span> Same object, different motion</div>
+      <h2>The decomposition follows the motion</h2>
+      <p>
+        The skinning weights are predicted from the video, not fixed per mesh. Driving the same character with two different
+        performances gives two different decompositions: in each case, the components group the vertices that move together in that video.
+      </p>
+    </div>
+    <div class="wrap wide">
+      <div class="skin-grid same-object">
+        <div class="skin-card">
+          <div class="skin-panels">
+            <video class="input" muted loop playsinline preload="auto" poster="static/videos/ab_83a95a49bb52.jpg" src="static/videos/ab_83a95a49bb52.mp4"></video>
+            <video muted loop playsinline preload="auto" poster="static/skinning/same_ab_83a95a49bb52.jpg" src="static/skinning/same_ab_83a95a49bb52.mp4"></video>
+          </div>
+          <div class="skin-meta"><span>Input video</span><span>Skinning weights</span></div>
+          <div class="skin-name">Dance</div>
+        </div>
+        <div class="skin-card">
+          <div class="skin-panels">
+            <video class="input" muted loop playsinline preload="auto" poster="static/videos/ab_90288386ca91.jpg" src="static/videos/ab_90288386ca91.mp4"></video>
+            <video muted loop playsinline preload="auto" poster="static/skinning/same_ab_90288386ca91.jpg" src="static/skinning/same_ab_90288386ca91.mp4"></video>
+          </div>
+          <div class="skin-meta"><span>Input video</span><span>Skinning weights</span></div>
+          <div class="skin-name">Breakdance</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="quantitative">
+    <div class="wrap">
+      <div class="eyebrow"><span class="num">08</span> Quantitative</div>
+      <p>
+        Geometry metrics follow the ActionMesh protocol: CD-3D, CD-4D, and the correspondence-based motion error CD-Motion.
+        Appearance metrics compare rendered views of the predicted animation against the ground-truth renders.
+      </p>
+    </div>
+    <div class="wrap wide">
+      <div class="table-card">
+        <div class="table-title">Table 1 · ActionBench <span>128 sequences, 16 frames</span></div>
+        <div class="table-scroll">
+          <table class="results">
+              <thead>
+                <tr><th rowspan="2">Method</th><th class="grp" colspan="3">Geometry</th><th class="grp" colspan="4">Appearance</th></tr>
+                <tr><th>CD-3D&darr;</th><th>CD-4D&darr;</th><th>CD-Motion&darr;</th><th>LPIPS&darr;</th><th>CLIP&uarr;</th><th>FVD&darr;</th><th>DreamSim&darr;</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Mesh4D</td><td>2.57</td><td>5.01</td><td>9.24</td><td>0.06</td><td>0.95</td><td>787.38</td><td>0.08</td></tr>
+                <tr><td>Motion3-to-4</td><td>2.49</td><td>5.34</td><td>10.31</td><td>0.07</td><td>0.92</td><td>1270.80</td><td>0.12</td></tr>
+                <tr><td>ActionMesh</td><td>3.30</td><td>5.61</td><td>11.12</td><td>0.08</td><td>0.93</td><td>1126.90</td><td>0.11</td></tr>
+                <tr class="ours"><td>BLARM (ours)</td><td>1.71</td><td>3.07</td><td>7.15</td><td>0.05</td><td>0.96</td><td>426.72</td><td>0.05</td></tr>
+              </tbody>
+          </table>
+        </div>
+        <div class="table-foot"><span><b>Quantitative evaluation on ActionBench.</b> BLARM outperforms feed-forward mesh animation baselines across geometric and appearance based metrics, indicating more accurate and temporally stable mesh animation.</span></div>
+      </div>
+      <div class="table-card">
+        <div class="table-title">Table 2 · Motion80 <span>80 sequences, variable length</span></div>
+        <div class="table-scroll">
+          <table class="results">
+              <thead>
+                <tr><th rowspan="2">Method</th><th class="grp" colspan="3">Geometry</th><th class="grp" colspan="4">Appearance</th></tr>
+                <tr><th>CD-3D&darr;</th><th>CD-4D&darr;</th><th>CD-Motion&darr;</th><th>LPIPS&darr;</th><th>CLIP&uarr;</th><th>FVD&darr;</th><th>DreamSim&darr;</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Mesh4D</td><td>5.40</td><td>11.13</td><td>24.26</td><td>0.11</td><td>0.93</td><td>1517.45</td><td>0.11</td></tr>
+                <tr><td>Motion3-to-4</td><td>2.25</td><td>5.89</td><td>13.00</td><td>0.07</td><td>0.95</td><td>735.57</td><td>0.06</td></tr>
+                <tr><td>ActionMesh</td><td>2.44</td><td>5.48</td><td>12.78</td><td>0.08</td><td>0.94</td><td>791.80</td><td>0.08</td></tr>
+                <tr class="ours"><td>BLARM (ours)</td><td>1.93</td><td>3.46</td><td>8.72</td><td>0.06</td><td>0.97</td><td>482.50</td><td>0.05</td></tr>
+              </tbody>
+          </table>
+        </div>
+        <div class="table-foot"><span><b>Quantitative evaluation on Motion80.</b> BLARM achieves better performance across metrics, demonstrating accurate reconstruction and temporally consistent mesh motion on long animation sequences.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="ablations">
+    <div class="wrap">
+      <div class="eyebrow"><span class="num">09</span> Ablations</div>
+      <h2>Every piece prevents a collapse</h2>
+      <p>
+        Without the contrastive term, the model collapses onto very few non-root components and accuracy drops sharply.
+        PartField features, entropy regularization, and the contrastive loss are complementary, and the latent rigid formulation beats
+        directly predicting per-vertex offsets, especially on CD-Motion.
+      </p>
+      <div class="two-col">
+        <div class="table-card">
+          <div class="table-title">Table 3 · Components <span>ActionBench</span></div>
+          <div class="table-scroll">
+            <table class="results compact">
+              <thead><tr><th>Model</th><th>CD-3D&darr;</th><th>CD-4D&darr;</th><th>CD-M&darr;</th><th>Lat./Vtx.</th><th>Lat./Shape</th></tr></thead>
+              <tbody>
+                <tr><td>w/o PartField, ent., con.</td><td>2.95</td><td>5.78</td><td>13.53</td><td>1.00</td><td>1.00</td></tr>
+                <tr><td>w/o contrastive</td><td>2.95</td><td>5.88</td><td>12.90</td><td>1.00</td><td>1.00</td></tr>
+                <tr><td>Per-vertex direct prediction</td><td>2.47</td><td>4.33</td><td>10.96</td><td>&mdash;</td><td>&mdash;</td></tr>
+                <tr><td>w/o PartField</td><td>2.37</td><td>4.07</td><td>10.51</td><td>1.85</td><td>22.20</td></tr>
+                <tr><td>w/o entropy</td><td>2.22</td><td>4.05</td><td>9.71</td><td>1.97</td><td>27.98</td></tr>
+                <tr><td>Control</td><td>2.22</td><td>4.04</td><td>9.48</td><td>1.59</td><td>25.52</td></tr>
+                <tr class="ours"><td>Final model</td><td>1.71</td><td>3.07</td><td>7.15</td><td>1.71</td><td>29.50</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="table-foot">Lat./Vtx.: active non-root components per vertex (weight &gt; 0.01). Lat./Shape: active components per shape.</div>
+        </div>
+        <div class="table-card">
+          <div class="table-title">Table 4 · Number of primitives $J$ <span>ActionBench</span></div>
+          <div class="table-scroll">
+            <table class="results compact">
+              <thead><tr><th>Model</th><th>CD-3D&darr;</th><th>CD-4D&darr;</th><th>CD-M&darr;</th><th>Lat./Vtx.</th><th>Lat./Shape</th></tr></thead>
+              <tbody>
+                <tr><td>$J = 15$</td><td>2.53</td><td>4.49</td><td>11.42</td><td>2.63</td><td>14.64</td></tr>
+                <tr class="ours"><td>$J = 31$</td><td>2.22</td><td>4.04</td><td>9.48</td><td>1.59</td><td>25.52</td></tr>
+                <tr><td>$J = 63$</td><td>2.38</td><td>4.20</td><td>9.44</td><td>1.22</td><td>42.01</td></tr>
+                <tr><td>$J = 127$</td><td>2.44</td><td>5.11</td><td>11.88</td><td>1.24</td><td>96.27</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="table-foot">Too few primitives limit capacity; too many fragment the representation. $J = 31$ balances both.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="limitations">
+    <div class="wrap">
+      <div class="eyebrow"><span class="num">10</span> Limitations</div>
+      <div class="lim-layout">
+        <div class="split-text">
+          <h2>When neighboring parts look alike</h2>
+          <ul class="limits">
+            <li>
+              <b>Entangled assignments.</b> When nearby regions look similar but should move independently, such as a hand resting against the torso,
+              vertices can be assigned to the wrong component and adjacent parts move together.
+            </li>
+            <li>
+              <b>Topology must support the motion.</b> BLARM animates the given canonical mesh; if its connectivity cannot reasonably support the target
+              motion, the predicted deformation may show artifacts.
+            </li>
+          </ul>
+        </div>
+        <figure class="figure figure-flat lim-figure">
+          <div class="tabs" role="tablist" data-tabs="limitations">
+            <button role="tab" class="tab active" data-target="lim-0" aria-selected="true">Robot</button>
+            <button role="tab" class="tab" data-target="lim-1" aria-selected="false">Burger</button>
+            <button role="tab" class="tab" data-target="lim-2" aria-selected="false">Iron Man</button>
+          </div>
+          <div class="vcard tab-panel active" id="lim-0">
+            <video muted loop playsinline preload="metadata" poster="static/videos/ab_1e5638dfe2df.jpg">
+              <source src="static/videos/ab_1e5638dfe2df.mp4" type="video/mp4">
+            </video>
+            <div class="vcard-meta"><span>Ground truth</span><span>BLARM</span></div>
+          </div>
+          <div class="vcard tab-panel" id="lim-1">
+            <video muted loop playsinline preload="metadata" poster="static/videos/m80_0b871ded46ec.jpg">
+              <source src="static/videos/m80_0b871ded46ec.mp4" type="video/mp4">
+            </video>
+            <div class="vcard-meta"><span>Ground truth</span><span>BLARM</span></div>
+          </div>
+          <div class="vcard tab-panel" id="lim-2">
+            <video muted loop playsinline preload="metadata" poster="static/videos/m80_01051d982719.jpg">
+              <source src="static/videos/m80_01051d982719.mp4" type="video/mp4">
+            </video>
+            <div class="vcard-meta"><span>Ground truth</span><span>BLARM</span></div>
+          </div>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="bibtex">
+    <div class="wrap">
+      <div class="eyebrow">Citation</div>
+      <h2>BibTeX</h2>
+      <div class="bibtex">
+        <button class="copy-btn" id="copyBib">Copy</button>
+<pre id="bibText">@inproceedings{goyal2026blarm,
+  title={BLARM: Animating 3D Objects from Video via Blending Latent Rigid Motion Primitives},
+  author={Goyal, Pradyumn and Ben-Shabat, Yizhak and Liu, Hsueh-Ti Derek and Jiang, Haomiao and Mukherjee, Snehasish and Spence, Kyle and Stauber, Mark and Kalogerakis, Evangelos and Zeng, Yunze},
+  booktitle={Advances in Neural Information Processing Systems (NeurIPS)},
+  year={2026}
+}</pre>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <p>
+      This project has received funding from the European Research Council (ERC) under the Horizon Research and Innovation Programme
+      (Grant agreement No. 101124742).
+    </p>
+    <p class="muted">
+      Layout inspired by the <a href="https://ngoductuanlhp.github.io/VolFill/" target="_blank" rel="noopener">VolFill</a> project page.
+    </p>
+  </div>
+</footer>
+
+<div class="lightbox" id="lightbox" aria-hidden="true">
+  <button class="lightbox-close" aria-label="Close">&times;</button>
+  <div class="lightbox-body" id="lightboxBody"></div>
+  <div class="lightbox-caption" id="lightboxCaption"></div>
+</div>
+
+<script src="static/js/main.js"></script>
+</body>
+</html>

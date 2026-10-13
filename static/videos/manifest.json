@@ -1,0 +1,180 @@
+{
+ "actionbench": [
+  {
+   "slug": "ab_cd2a2d7fe113",
+   "label": "Eagle",
+   "frames": 16
+  },
+  {
+   "slug": "ab_82f393a2e6c0",
+   "label": "Bat",
+   "frames": 16
+  },
+  {
+   "slug": "ab_1edbd18df3b6",
+   "label": "Scorpion",
+   "frames": 16
+  },
+  {
+   "slug": "ab_0fa47c0b4a22",
+   "label": "Christmas tree",
+   "frames": 16
+  },
+  {
+   "slug": "ab_2957d5c06a15",
+   "label": "Skeleton",
+   "frames": 16
+  },
+  {
+   "slug": "ab_7806e18e09ed",
+   "label": "Agumon",
+   "frames": 16
+  },
+  {
+   "slug": "ab_e607cac1413a",
+   "label": "Elk",
+   "frames": 16
+  },
+  {
+   "slug": "ab_0ec701a445b8",
+   "label": "Tread robot",
+   "frames": 16
+  },
+  {
+   "slug": "ab_95878b202a62",
+   "label": "Radish",
+   "frames": 16
+  },
+  {
+   "slug": "ab_b0b646eb7318",
+   "label": "Alien",
+   "frames": 16
+  },
+  {
+   "slug": "ab_e71320db1986",
+   "label": "Polar bear",
+   "frames": 16
+  },
+  {
+   "slug": "ab_46f5711e3ac0",
+   "label": "Training dummy",
+   "frames": 16
+  },
+  {
+   "slug": "ab_2f305a7ad678",
+   "label": "Goblin",
+   "frames": 16
+  },
+  {
+   "slug": "ab_f50b8e5f13e2",
+   "label": "Horned dino",
+   "frames": 16
+  },
+  {
+   "slug": "ab_a59dbd60a5cc",
+   "label": "Treasure chest",
+   "frames": 16
+  }
+ ],
+ "motion80": [
+  {
+   "slug": "m80_2d0701a19992",
+   "label": "Chicken",
+   "frames": 26
+  },
+  {
+   "slug": "m80_1aa28900f047",
+   "label": "Mushroom robot",
+   "frames": 16
+  },
+  {
+   "slug": "m80_01fa8487749d",
+   "label": "Walker",
+   "frames": 16
+  },
+  {
+   "slug": "m80_1b15161e662d",
+   "label": "Thin alien",
+   "frames": 21
+  },
+  {
+   "slug": "m80_b3139fdc5465",
+   "label": "Mech",
+   "frames": 44
+  },
+  {
+   "slug": "m80_2ed510f819b7",
+   "label": "Mushroom",
+   "frames": 53
+  },
+  {
+   "slug": "m80_3279369cb5a0",
+   "label": "Turtle",
+   "frames": 26
+  },
+  {
+   "slug": "m80_0c5d13b5a1ba",
+   "label": "Brawler",
+   "frames": 39
+  },
+  {
+   "slug": "m80_1697d86e7a2f",
+   "label": "Donkey Kong",
+   "frames": 28
+  },
+  {
+   "slug": "m80_0b9df8b7d0db",
+   "label": "Brute",
+   "frames": 27
+  },
+  {
+   "slug": "m80_35689c8c52d5",
+   "label": "Blob",
+   "frames": 63
+  },
+  {
+   "slug": "m80_33bd85b5b24b",
+   "label": "T-Rex",
+   "frames": 72
+  },
+  {
+   "slug": "m80_01bd7226a801",
+   "label": "Wheel robot",
+   "frames": 26
+  },
+  {
+   "slug": "m80_9cda2dc67b5c",
+   "label": "Block robot",
+   "frames": 26
+  }
+ ],
+ "limitations": [
+  {
+   "slug": "ab_1e5638dfe2df",
+   "label": "Robot",
+   "frames": 16
+  },
+  {
+   "slug": "m80_0b871ded46ec",
+   "label": "Burger",
+   "frames": 64
+  },
+  {
+   "slug": "m80_01051d982719",
+   "label": "Iron Man",
+   "frames": 72
+  }
+ ],
+ "same_object": [
+  {
+   "slug": "ab_83a95a49bb52",
+   "label": "Dance",
+   "frames": 16
+  },
+  {
+   "slug": "ab_90288386ca91",
+   "label": "Breakdance",
+   "frames": 16
+  }
+ ]
+}
