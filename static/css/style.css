@@ -359,6 +359,7 @@ input[type="range"] { accent-color: var(--ours); width: 100%; }
 .skin-meta span + span { color: var(--ours-text); border-left: 1px solid var(--border); }
 .skin-name { padding: 0 12px 10px; font-size: 0.875rem; font-weight: 500; }
 .skin-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 16px; }
+.skin-note { margin-top: 18px; font-size: 0.875rem; color: var(--text-faint); }
 .skin-chip {
   padding: 5px 12px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface);
   color: var(--text-muted); font: inherit; font-size: 0.8rem; cursor: pointer; transition: all 0.2s;
