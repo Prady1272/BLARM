@@ -69,7 +69,7 @@
     const r = v.getBoundingClientRect();
     if (r.bottom > 0 && r.top < window.innerHeight) v.play().catch(() => {});
   }
-  $$(".hero-reel video, .lim-figure video, .same-object video").forEach((v) => videoObserver.observe(v));
+  $$(".hero-reel video, .lim-figure video, .same-object video, .itw-figure video").forEach((v) => videoObserver.observe(v));
 
   /* ---------- Skinning viewer: two examples at a time ---------- */
   function initSkinViewer(manifest) {

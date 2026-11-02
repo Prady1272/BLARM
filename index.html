@@ -33,6 +33,7 @@
       <a href="#method">Method</a>
       <a href="#results">Results</a>
       <a href="#comparison">Comparison</a>
+      <a href="#in-the-wild">In the wild</a>
       <a href="#skinning">Interpretability</a>
       <a href="#quantitative">Numbers</a>
       <a href="#bibtex">BibTeX</a>
@@ -316,9 +317,47 @@
     </div>
   </section>
 
+  <section class="section" id="in-the-wild">
+    <div class="wrap">
+      <div class="eyebrow"><span class="num">06</span> In the wild</div>
+      <h2>Beyond the benchmarks</h2>
+      <p>
+        BLARM applied to clips from animated films, each paired with a static mesh of the character. Each example shows the original video next to
+        BLARM's animated mesh, seen from the input camera and colored by its predicted skinning weights, with the location of every component marked.
+      </p>
+      <div class="tabs" role="tablist" data-tabs="in-the-wild">
+        <button role="tab" class="tab active" data-target="itw-0" aria-selected="true">Lion</button>
+        <button role="tab" class="tab" data-target="itw-1" aria-selected="false">SpongeBob</button>
+        <button role="tab" class="tab" data-target="itw-2" aria-selected="false">Monster</button>
+      </div>
+    </div>
+    <div class="wrap wide">
+      <div class="itw-figure">
+        <div class="vcard tab-panel active" id="itw-0">
+          <video muted loop playsinline preload="metadata" poster="static/videos/itw_lion.jpg">
+            <source src="static/videos/itw_lion.mp4" type="video/mp4">
+          </video>
+          <div class="vcard-meta"><span>Input video</span><span>BLARM</span></div>
+        </div>
+        <div class="vcard tab-panel" id="itw-1">
+          <video muted loop playsinline preload="metadata" poster="static/videos/itw_spongebob.jpg">
+            <source src="static/videos/itw_spongebob.mp4" type="video/mp4">
+          </video>
+          <div class="vcard-meta"><span>Input video</span><span>BLARM</span></div>
+        </div>
+        <div class="vcard tab-panel" id="itw-2">
+          <video muted loop playsinline preload="metadata" poster="static/videos/itw_monster.jpg">
+            <source src="static/videos/itw_monster.mp4" type="video/mp4">
+          </video>
+          <div class="vcard-meta"><span>Input video</span><span>BLARM</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <section class="section" id="skinning">
     <div class="wrap">
-      <div class="eyebrow"><span class="num">06</span> Interpretability</div>
+      <div class="eyebrow"><span class="num">07</span> Interpretability</div>
       <h2>Part structure, discovered without supervision</h2>
       <p>
         Coloring each vertex by its skinning weights shows what BLARM has learned. Without any rig or part labels, the components line up
@@ -348,7 +387,7 @@
 
   <section class="section" id="same-object">
     <div class="wrap">
-      <div class="eyebrow"><span class="num">07</span> Same object, different motion</div>
+      <div class="eyebrow"><span class="num">08</span> Same object, different motion</div>
       <h2>The decomposition follows the motion</h2>
       <p>
         The skinning weights are predicted from the video, not fixed per mesh. Driving the same character with two different
@@ -379,7 +418,7 @@
 
   <section class="section" id="quantitative">
     <div class="wrap">
-      <div class="eyebrow"><span class="num">08</span> Quantitative</div>
+      <div class="eyebrow"><span class="num">09</span> Quantitative</div>
       <p>
         Geometry metrics follow the ActionMesh protocol: CD-3D, CD-4D, and the correspondence-based motion error CD-Motion.
         Appearance metrics compare rendered views of the predicted animation against the ground-truth renders.
@@ -427,7 +466,7 @@
 
   <section class="section" id="ablations">
     <div class="wrap">
-      <div class="eyebrow"><span class="num">09</span> Ablations</div>
+      <div class="eyebrow"><span class="num">10</span> Ablations</div>
       <h2>Every piece prevents a collapse</h2>
       <p>
         Without the contrastive term, the model collapses onto very few non-root components and accuracy drops sharply.
@@ -474,7 +513,7 @@
 
   <section class="section" id="limitations">
     <div class="wrap">
-      <div class="eyebrow"><span class="num">10</span> Limitations</div>
+      <div class="eyebrow"><span class="num">11</span> Limitations</div>
       <div class="lim-layout">
         <div class="split-text">
           <h2>When neighboring parts look alike</h2>

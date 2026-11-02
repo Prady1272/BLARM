@@ -319,6 +319,9 @@ input[type="range"] { accent-color: var(--ours); width: 100%; }
 .lim-figure { margin: 28px auto 0; max-width: 680px; text-align: center; }
 .lim-figure .tabs { margin: 0 auto 14px; }
 .lim-figure .vcard { cursor: default; text-align: left; }
+.itw-figure { margin: 26px auto 0; max-width: 860px; }
+.itw-figure .vcard { cursor: default; }
+.itw-figure .vcard:hover { transform: none; }
 .lim-figure figcaption { text-align: left; }
 .tab-panel { display: none; }
 .tab-panel.active { display: block; animation: fade 0.35s ease; }

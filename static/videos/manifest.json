@@ -176,5 +176,22 @@
    "label": "Breakdance",
    "frames": 16
   }
+ ],
+ "in_the_wild": [
+  {
+   "slug": "itw_lion",
+   "label": "Lion",
+   "frames": 30
+  },
+  {
+   "slug": "itw_spongebob",
+   "label": "SpongeBob",
+   "frames": 16
+  },
+  {
+   "slug": "itw_monster",
+   "label": "Monster",
+   "frames": 25
+  }
  ]
 }
